@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  
+  <link rel="manifest" href="manifest.json" />
+  
+  <title>Catbot GPT Final</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      height: 100vh; display: flex; justify-content: center; align-items: center;
+    }
+    .chatbot-container {
+      width: 420px; height: 700px; background: white; border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden;
+      display: flex; flex-direction: column; position: relative;
+    }
+    .chat-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; padding: 20px; text-align: center; position: relative;
+    }
+    .bot-avatar {
+      width: 50px; height: 50px; background: white; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 10px; font-size: 20px; color: #667eea; font-weight: bold;
+    }
+    .menu-button {
+      position: absolute; top: 15px; right: 15px; background: transparent;
+      border: none; font-size: 24px; color: white; cursor: pointer; padding: 5px;
+    }
+    .popup-menu {
+      position: absolute; top: 55px; right: 15px; background: #fff;
+      border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      display: none; flex-direction: column; z-index: 999; min-width: 160px;
+    }
+    .popup-menu button {
+      background: none; border: none; padding: 12px 20px; text-align: left;
+      cursor: pointer; width: 100%; font-size: 14px; color: #333;
+    }
+    .popup-menu button:hover { background: #f2f2f2; }
+    .chat-messages {
+      flex: 1; padding: 20px; overflow-y: auto; background: #f8f9fa;
+    }
+    .message { margin-bottom: 15px; display: flex; align-items: flex-end; }
+    .message.user { justify-content: flex-end; }
+    .message-bubble {
+      max-width: 70%; padding: 12px 16px; border-radius: 18px; word-wrap: break-word;
+    }
+    .message.user .message-bubble {
+      background: #667eea; color: white; border-bottom-right-radius: 5px; font-size: 16px;
+    }
+    .message.bot .message-bubble {
+      background: white; color: #333; border: 1px solid #e0e0e0;
+      border-bottom-left-radius: 5px;
+    }
+    .chat-input-container {
+      padding: 20px; background: white; border-top: 1px solid #e0e0e0;
+    }
+    .input-group {
+      display: flex; gap: 10px; align-items: center;
+    }
+    .chat-input {
+      flex: 1; padding: 12px 16px; border: 2px solid #e0e0e0;
+      border-radius: 25px; outline: none; font-size: 14px;
+    }
+    .send-btn {
+      width: 45px; height: 45px; background: #667eea; border: none;
+      border-radius: 50%; color: white; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .learning-mode {
+      background: #fff8dc; border: 1px solid #ffe58f; border-radius: 10px;
+      padding: 15px; margin: 10px 0; text-align: center;
+    }
+    .learning-mode input {
+      padding: 10px; width: 95%; border: 1px solid #ccc; border-radius: 5px;
+      margin: 10px 0; font-size: 16px;
+    }
+    .learning-mode button {
+      padding: 8px 15px; margin: 5px; border: none; border-radius: 5px; cursor: pointer;
+    }
+    .learning-mode button.teach { background: #4CAF50; color: white; }
+  </style>
+</head>
+<script type="module" src="https://tabelku.netlify.app/firebase.js"></script>
+<body>
+  <div class="chatbot-container">
+    <div class="chat-header">
+      <button class="menu-button" onclick="togglePopup()">⋮</button>
+      <div class="popup-menu" id="popupMenu">
+        <button onclick="importData()">📂 Upload Data</button>
+        <button onclick="exportData()">💾 Download Data</button>
+        <button onclick="clearData()">🗑️ Hapus Semua</button>
+      </div>
+      <div class="bot-avatar">🤖</div>
+      <h3>Catbot GPT</h3>
+      <h5>Siap melayani</h5>
+    </div>
+
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="message bot">
+        <div class="message-bubble">
+          Halo! Ketik pertanyaanmu.
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-container">
+      <div class="input-group">
+        <input type="text" class="chat-input" id="messageInput" placeholder="Ketik pertanyaan...">
+        <button class="send-btn" id="sendBtn">➤</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+
+  let currentInput = '';
+  let knowledgeBase = {};
+
+  // Load yang lama kalau ada
+  if (localStorage.getItem('knowledgeBase')) {
+    knowledgeBase = JSON.parse(localStorage.getItem('knowledgeBase'));
+  }
+
+  // Tambah pesan ke chat
+  function addMessage(text, isUser = false) {
+    const container = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = `message ${isUser ? 'user' : 'bot'}`;
+    div.innerHTML = `<div class="message-bubble">${text}</div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // Kirim pesan
+  function sendMessage() {
+    const inputField = document.getElementById('messageInput');
+    const userOriginal = inputField.value.trim();
+    const userText = userOriginal.toLowerCase();
+    if (!userText) return;
+
+    addMessage(userOriginal, true);
+    inputField.value = '';
+
+    if (knowledgeBase[userText]) {
+      addMessage(knowledgeBase[userText]);
+    } else {
+      currentInput = userText;
+      addMessage("Maaf, saya belum tau. Mau ajari bot?");
+      addLearning();
+    }
+  }
+
+  // Form ajar bot
+  function addLearning() {
+    // Hapus form lama kalau ada
+    const existing = document.querySelector('.learning-mode');
+    if (existing) existing.remove();
+
+    const container = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'learning-mode';
+    div.innerHTML = `
+      <p>Jawaban belum ada. Mau ajari bot?</p>
+      <input type="text" id="teachInput" placeholder="Ketik jawaban di sini...">
+      <button class="teach" onclick="saveTeaching()">Simpan Jawaban</button>
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // Simpan jawaban baru
+  function saveTeaching() {
+    const jawab = document.getElementById('teachInput').value.trim();
+    if (jawab) {
+      knowledgeBase[currentInput] = jawab;
+      localStorage.setItem('knowledgeBase', JSON.stringify(knowledgeBase));
+      addMessage("Terima kasih! Bot sudah diajari.");
+      document.querySelector('.learning-mode').remove();
+    } else {
+      alert('Jawaban tidak boleh kosong!');
+    }
+  }
+
+  // Toggle menu popup
+  function togglePopup() {
+    const popup = document.getElementById('popupMenu');
+    popup.style.display = popup.style.display === 'flex' ? 'none' : 'flex';
+  }
+
+  // Export file JSON
+  function exportData() {
+    const dataStr = JSON.stringify(knowledgeBase, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'knowledgeBase.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Mulai import
+  function importData() {
+    document.getElementById('importFile').click();
+  }
+
+  // Handle file masuk
+  function handleImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const importedData = JSON.parse(e.target.result);
+        let newData = {};
+
+        if (Array.isArray(importedData.patterns)) {
+          importedData.patterns.forEach(item => {
+            newData[item.tanya.trim().toLowerCase()] = item.jawab;
+          });
+        } else if (typeof importedData === 'object') {
+          Object.keys(importedData).forEach(key => {
+            newData[key.trim().toLowerCase()] = importedData[key];
+          });
+        } else {
+          alert('Format file tidak valid!');
+          return;
+        }
+
+        // Gabungkan, jangan replace!
+        knowledgeBase = { ...knowledgeBase, ...newData };
+        localStorage.setItem('knowledgeBase', JSON.stringify(knowledgeBase));
+        alert('Data berhasil di-import!');
+      } catch (err) {
+        alert('Gagal membaca file JSON!');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // Hapus semua data
+  function clearData() {
+    if (confirm('Yakin mau hapus semua data?')) {
+      knowledgeBase = {};
+      localStorage.removeItem('knowledgeBase');
+      alert('Semua data dihapus!');
+    }
+  }
+
+  // Tombol kirim & enter
+  document.getElementById('sendBtn').addEventListener('click', sendMessage);
+  document.getElementById('messageInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') sendMessage();
+  });
+</script>
+
+</body>
+</html>
