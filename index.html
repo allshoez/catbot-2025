@@ -1,269 +1,233 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Catat - Final (IndexedDB)</title>
-<style>
-:root{--bg:#f5f7fb;--card:#fff;--accent:#2563eb;--danger:#ef4444;--radius:10px}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:#111;padding:16px}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-h1{margin:0;font-size:1.15rem}
-.btn{padding:8px 10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:transparent;cursor:pointer}
-.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-.grid{display:flex;gap:12px;flex-wrap:wrap}
-.card{background:var(--card);padding:12px;border-radius:var(--radius);box-shadow:0 6px 18px rgba(2,6,23,0.06);min-width:160px;flex:0 0 220px;display:flex;flex-direction:column;gap:8px}
-.title{font-weight:600;display:flex;justify-content:space-between;align-items:center}
-.icon-row{display:flex;gap:8px;justify-content:flex-end}
-.icon-btn{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:6px;border-radius:8px;cursor:pointer}
-.icon-btn.danger{border-color:var(--danger);color:var(--danger)}
-.modal-backdrop{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.38);z-index:60;visibility:hidden;opacity:0;transition:opacity .12s}
-.modal-backdrop.show{visibility:visible;opacity:1}
-.modal-card{background:var(--card);padding:16px;border-radius:12px;width:320px;box-shadow:0 10px 30px rgba(2,6,23,0.12);display:flex;flex-direction:column;gap:10px}
-.modal-card input{padding:10px;border-radius:8px;border:1px solid #e6e9ef}
-.view{display:none}
-.view.active{display:block}
-.form-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.form-row input{padding:8px;border-radius:8px;border:1px solid #e6e9ef;min-width:140px}
-.table-wrap{overflow:auto;background:var(--card);border-radius:10px;padding:8px;box-shadow:0 6px 18px rgba(2,6,23,0.04)}
-.table{width:100%;border-collapse:collapse}
-.table th,.table td{padding:10px;border-bottom:1px solid #eef2f7;text-align:center}
-.table thead th{background:#f3f6fb}
-.table tfoot td{background:#fafbff;font-weight:600}
-.small{font-size:.9rem;padding:6px 10px;border-radius:8px}
-.info{color:#6b7280;margin-top:8px}
-@media (max-width:640px){.card{flex:1 1 100%}.form-row input{min-width:120px}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="manifest" href="/manifest.json" />
+  
+  
+  <title>Catbot GPT - Final Stabil</title>
+  <style>
+    :root {
+      --primary-start: #667eea;
+      --primary-end: #764ba2;
+      --user-bubble: #667eea;
+      --bot-bubble: #ffffff;
+      --bg-light: #f8f9fa;
+      --border-color: #e0e0e0;
+      --text-dark: #333;
+      --text-light: #ffffff;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+      height: 100vh; display: flex; justify-content: center; align-items: center;
+    }
+    .chatbot-container {
+      width: 420px; height: 700px; background: var(--bot-bubble); border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden;
+      display: flex; flex-direction: column; position: relative;
+    }
+    .chat-header {
+      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+      color: var(--text-light); padding: 20px; text-align: center; position: relative; flex-shrink: 0;
+    }
+    .bot-avatar { width: 50px; height: 50px; background: var(--bot-bubble); border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; color: var(--primary-start); font-weight: bold; font-size: 20px; }
+    .menu-button { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; color: var(--text-light); cursor: pointer; }
+    .popup-menu { position: absolute; top: 55px; right: 15px; background: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); display: none; flex-direction: column; z-index: 999; }
+    .popup-menu button { background: none; border: none; padding: 12px 20px; text-align: left; cursor: pointer; width: 100%; font-size: 14px; }
+    .popup-menu button:hover { background: #f2f2f2; }
+    .chat-messages { flex: 1; padding: 20px; overflow-y: auto; background: var(--bg-light); }
+    .message { margin-bottom: 15px; display: flex; }
+    .message.user { justify-content: flex-end; }
+    .message-bubble { max-width: 75%; padding: 12px 16px; border-radius: 18px; }
+    .message.user .message-bubble { background: var(--user-bubble); color: var(--text-light); border-bottom-right-radius: 5px; }
+    .message.bot .message-bubble { background: var(--bot-bubble); color: var(--text-dark); border: 1px solid var(--border-color); border-bottom-left-radius: 5px; }
+    .chat-input-container { padding: 15px 20px; background: var(--bot-bubble); border-top: 1px solid var(--border-color); flex-shrink: 0; }
+    .input-group { display: flex; gap: 10px; align-items: center; }
+    .chat-input { flex: 1; padding: 12px 16px; border: 2px solid var(--border-color); border-radius: 25px; outline: none; }
+    .send-btn { width: 45px; height: 45px; background: var(--user-bubble); border: none; border-radius: 50%; color: var(--text-light); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .learning-mode { background: #fff8dc; border-top: 1px solid #ffe58f; padding: 15px 20px; }
+    .learning-mode p { margin-bottom: 10px; }
+    .learning-mode input { padding: 10px; width: 100%; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 10px; }
+    .learning-mode button { padding: 10px 15px; border: none; border-radius: 5px; background: #4CAF50; color: white; width: 100%; font-size: 16px; cursor: pointer; }
+  </style>
 </head>
 <body>
-<header class="topbar">
-  <h1>📂 Catat — Final</h1>
-  <div><button id="btnAddFolder" class="btn primary">+ Buat Folder</button></div>
-</header>
-
-<main>
-  <section id="viewFolders" class="view active">
-    <div id="foldersContainer" class="grid"></div>
-    <p class="info">Klik "Buka" untuk melihat isi folder. Rename / Hapus via tombol.</p>
-  </section>
-
-  <section id="viewTable" class="view">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-      <button id="btnBack" class="btn">← Kembali</button>
-      <h2 id="folderTitle" style="margin:0">Tabel</h2>
+  <div class="chatbot-container">
+    <div class="chat-header">
+      <button class="menu-button" id="menuBtn">⋮</button>
+      <div class="popup-menu" id="popupMenu">
+        <button id="uploadBtn">📂 Upload Data</button>
+        <button id="downloadBtn">💾 Download Data</button>
+      </div>
+      <div class="bot-avatar">🤖</div>
+      <h3>Catbot GPT</h3><h5>Siap melayani</h5>
     </div>
-
-    <div class="form-row">
-      <input id="inputNama" placeholder="Nama Barang" />
-      <input id="inputHarga" type="number" placeholder="Harga (angka)" />
-      <input id="inputLaba" type="number" placeholder="Laba (angka)" />
-      <button id="btnAddItem" class="btn primary">Tambah</button>
-    </div>
-
-    <div class="table-wrap">
-      <table class="table" id="dataTable">
-        <thead><tr><th>No</th><th>Nama Barang</th><th>Harga</th><th>Laba</th><th>Aksi</th></tr></thead>
-        <tbody id="tbody"></tbody>
-        <tfoot><tr><td colspan="2"><strong>Total</strong></td><td id="sumHarga">0</td><td id="sumLaba">0</td><td></td></tr></tfoot>
-      </table>
-    </div>
-  </section>
-</main>
-
-<div id="modal" class="modal-backdrop" role="dialog" aria-hidden="true">
-  <div class="modal-card">
-    <h3 id="modalTitle">Buat Folder</h3>
-    <input id="modalInput" placeholder="Nama folder" autocomplete="off" />
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button id="modalCancel" class="btn">Batal</button>
-      <button id="modalSave" class="btn primary">Simpan</button>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div id="teachContainer"></div>
+    <div class="chat-input-container">
+      <div class="input-group">
+        <input type="text" class="chat-input" id="messageInput" placeholder="Ketik pertanyaan...">
+        <button class="send-btn" id="sendBtn">➤</button>
+      </div>
     </div>
   </div>
-</div>
+  <input type="file" id="importFile" accept=".json" style="display:none">
 
-<script>
-/* Final single-file IndexedDB app.
-   Robust openDB: if store missing, delete DB & recreate automatically.
-*/
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, setDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const DB_NAME = 'CatatDB_final_v1';
-const DB_VERSION = 1;
-const STORE_FOLDERS = 'folders';
-const STORE_ITEMS = 'items';
-let db = null;
+const firebaseConfig = {
+  apiKey: "xxx",
+  authDomain: "xxx",
+  projectId: "xxx",
+  storageBucket: "xxx.appspot.com",
+  messagingSenderId: "xxx",
+  appId: "xxx"
+};
 
-const foldersContainer = document.getElementById('foldersContainer');
-const btnAddFolder = document.getElementById('btnAddFolder');
-const modal = document.getElementById('modal');
-const modalTitle = document.getElementById('modalTitle');
-const modalInput = document.getElementById('modalInput');
-const modalCancel = document.getElementById('modalCancel');
-const modalSave = document.getElementById('modalSave');
+document.addEventListener('DOMContentLoaded', async () => {
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-const viewFolders = document.getElementById('viewFolders');
-const viewTable = document.getElementById('viewTable');
-const btnBack = document.getElementById('btnBack');
-const folderTitle = document.getElementById('folderTitle');
+  const chat = {
+    downloadBtn: document.getElementById('downloadBtn'),
+    chatMessages: document.getElementById('chatMessages'),
+    messageInput: document.getElementById('messageInput'),
+    sendBtn: document.getElementById('sendBtn'),
+    teachContainer: document.getElementById('teachContainer'),
+    menuBtn: document.getElementById('menuBtn'),
+    popupMenu: document.getElementById('popupMenu'),
+    uploadBtn: document.getElementById('uploadBtn'),
+    importFile: document.getElementById('importFile')
+  };
 
-const inputNama = document.getElementById('inputNama');
-const inputHarga = document.getElementById('inputHarga');
-const inputLaba = document.getElementById('inputLaba');
-const btnAddItem = document.getElementById('btnAddItem');
-const tbody = document.getElementById('tbody');
-const sumHargaEl = document.getElementById('sumHarga');
-const sumLabaEl = document.getElementById('sumLaba');
+  const knowledgeBase = new Map();
 
-let modalMode='add', editFolderId=null, currentFolderId=null;
+  chat.uploadBtn.onclick = () => {
+    chat.popupMenu.style.display = 'none';
+    chat.importFile.click();
+  };
 
-// ---------- DB open with safety ----------
-function createStoresIfNeeded(dbInstance){
-  const names = dbInstance.objectStoreNames;
-  if (!names.contains(STORE_FOLDERS)) dbInstance.createObjectStore(STORE_FOLDERS, { keyPath:'id', autoIncrement:true });
-  if (!names.contains(STORE_ITEMS)) {
-    const s = dbInstance.createObjectStore(STORE_ITEMS, { keyPath:'id', autoIncrement:true });
-    s.createIndex('folderId','folderId',{unique:false});
-  }
-}
+  chat.downloadBtn.onclick = () => {
+    chat.popupMenu.style.display = 'none';
+    exportData();
+  };
 
-function openDB_safe(retry=false){
-  return new Promise((resolve,reject)=>{
-    const rq = indexedDB.open(DB_NAME, DB_VERSION);
-    let upgraded = false;
-    rq.onupgradeneeded = (e) => {
-      upgraded = true;
-      const d = e.target.result;
-      createStoresIfNeeded(d);
-    };
-    rq.onsuccess = (e) => {
-      db = e.target.result;
-      // sanity check: verify stores exist
-      if (!db.objectStoreNames.contains(STORE_FOLDERS) || !db.objectStoreNames.contains(STORE_ITEMS)) {
-        // if we've already retried once, fail
-        db.close();
-        if (retry) return reject(new Error('Object stores missing after upgrade'));
-        // delete DB and reopen to recreate stores
-        const del = indexedDB.deleteDatabase(DB_NAME);
-        del.onsuccess = () => {
-          console.warn('Deleted DB to recreate missing stores, reopening...');
-          // small delay then reopen
-          setTimeout(()=>openDB_safe(true).then(resolve).catch(reject), 200);
-        };
-        del.onerror = () => reject(new Error('Failed delete DB'));
-        return;
+  const addMessage = (text, sender = 'bot') => {
+    const msg = document.createElement('div');
+    msg.className = `message ${sender}`;
+    msg.innerHTML = `<div class="message-bubble">${text}</div>`;
+    chat.chatMessages.appendChild(msg);
+    chat.chatMessages.scrollTop = chat.chatMessages.scrollHeight;
+  };
+
+  const toggleInput = (state) => {
+    chat.messageInput.disabled = !state;
+    chat.sendBtn.disabled = !state;
+  };
+
+  const loadKnowledge = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "knowledgeBase"));
+      querySnapshot.forEach(doc => knowledgeBase.set(doc.id, doc.data().jawab));
+      addMessage('✅ Database siap. Tanyakan apa saja!', 'bot');
+    } catch (err) {
+      console.error(err);
+      addMessage('⚠️ Tidak bisa sambung ke database. Aku akan bekerja offline.', 'bot');
+    }
+  };
+
+  const sendMessage = async () => {
+    const msg = chat.messageInput.value.trim();
+    if (!msg) return;
+    addMessage(msg, 'user');
+    chat.messageInput.value = '';
+    toggleInput(false);
+
+    setTimeout(() => {
+      const ans = knowledgeBase.get(msg.toLowerCase());
+      if (ans) {
+        addMessage(ans, 'bot');
+      } else {
+        addMessage("Aku belum tahu itu. Ajarin aku, ya!", 'bot');
+        teachUI(msg);
       }
-      resolve(db);
+      toggleInput(true);
+    }, 300);
+  };
+
+  const teachUI = (q) => {
+    chat.teachContainer.innerHTML = `<div class="learning-mode">
+      <p>Ajarin aku: <b>${q}</b></p>
+      <input type="text" id="teachInput" placeholder="Jawabannya...">
+      <button id="teachSaveBtn">Simpan</button>
+    </div>`;
+    document.getElementById('teachInput').focus();
+    document.getElementById('teachSaveBtn').onclick = async () => {
+      const ans = document.getElementById('teachInput').value.trim();
+      if (!ans) return alert('Isi jawaban dulu!');
+      addMessage('⏳ Menyimpan...', 'bot');
+      await setDoc(doc(db, "knowledgeBase", q.toLowerCase()), { jawab: ans });
+      knowledgeBase.set(q.toLowerCase(), ans);
+      addMessage('✅ Berhasil disimpan!', 'bot');
+      chat.teachContainer.innerHTML = '';
     };
-    rq.onerror = (e) => reject(e.target.error || new Error('openDB error'));
-  });
-}
+  };
 
-// ---------- helpers ----------
-function showModal(mode='add', folderId=null, folderName=''){
-  modalMode = mode; editFolderId = folderId;
-  modalTitle.textContent = mode==='add' ? 'Buat Folder' : 'Rename Folder';
-  modalInput.value = folderName || '';
-  modal.classList.add('show');
-  modal.setAttribute('aria-hidden','false');
-  setTimeout(()=>modalInput.focus(),50);
-}
-function hideModal(){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); modalInput.value=''; modalMode='add'; editFolderId=null; }
-function escapeHtml(t){ if (!t) return ''; return t.toString().replace(/[&<>"']/g, (m)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-function formatNumber(n){ if (n==null) return '0'; return new Intl.NumberFormat('id-ID').format(Number(n)||0); }
-
-// ---------- folder operations ----------
-function addFolder(name){ return new Promise((res,rej)=>{ const tx=db.transaction(STORE_FOLDERS,'readwrite'); tx.objectStore(STORE_FOLDERS).add({name,createdAt:Date.now()}); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); }
-function updateFolder(id,name){ return new Promise((res,rej)=>{ const tx=db.transaction(STORE_FOLDERS,'readwrite'); const s=tx.objectStore(STORE_FOLDERS); const r=s.get(id); r.onsuccess=()=>{ const rec=r.result; if(!rec) return rej('notfound'); rec.name=name; s.put(rec);} ; tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); }
-function deleteFolderAndItems(id){ return new Promise((res,rej)=>{ const tx=db.transaction([STORE_FOLDERS,STORE_ITEMS],'readwrite'); tx.objectStore(STORE_FOLDERS).delete(id); const idx=tx.objectStore(STORE_ITEMS).index('folderId'); const range=IDBKeyRange.only(id); const cur=idx.openCursor(range); cur.onsuccess=(e)=>{ const c=e.target.result; if(c){ c.delete(); c.continue();}}; tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); }
-function getAllFolders(){ return new Promise((res,rej)=>{ const tx=db.transaction(STORE_FOLDERS,'readonly'); const s=tx.objectStore(STORE_FOLDERS); const r=s.getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(r.error); }); }
-
-// ---------- items ----------
-function addItemToDB(nama,harga,laba){ return new Promise((res,rej)=>{ const tx=db.transaction(STORE_ITEMS,'readwrite'); tx.objectStore(STORE_ITEMS).add({folderId:currentFolderId,nama,harga:Number(harga)||0,laba:Number(laba)||0,createdAt:Date.now()}); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); }
-function getItemsForFolder(folderId){ return new Promise((res,rej)=>{ const tx=db.transaction(STORE_ITEMS,'readonly'); const s=tx.objectStore(STORE_ITEMS); const idx=s.index('folderId'); const r=idx.getAll(IDBKeyRange.only(folderId)); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(r.error); }); }
-function updateItemInDB(id,fields){ return new Promise((res,rej)=>{ const tx=db.transaction(STORE_ITEMS,'readwrite'); const s=tx.objectStore(STORE_ITEMS); const g=s.get(id); g.onsuccess=()=>{ const rec=g.result; if(!rec) return rej('notfound'); Object.assign(rec,fields); s.put(rec);} ; tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); }
-function deleteItemInDB(id){ return new Promise((res,rej)=>{ const tx=db.transaction(STORE_ITEMS,'readwrite'); tx.objectStore(STORE_ITEMS).delete(id); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); }
-
-// ---------- render ----------
-async function renderFolders(){
-  try{
-    const list = await getAllFolders();
-    foldersContainer.innerHTML='';
-    if(!list.length){ const p=document.createElement('p'); p.className='info'; p.textContent='Belum ada folder. Klik "Buat Folder" untuk mulai.'; foldersContainer.appendChild(p); return; }
-    list.forEach(folder=>{
-      const card=document.createElement('div'); card.className='card';
-      card.innerHTML = `<div class="title"><div>${escapeHtml(folder.name)}</div><div class="meta">${new Date(folder.createdAt||Date.now()).toLocaleDateString()}</div></div>
-      <div class="icon-row">
-        <button class="icon-btn" data-id="${folder.id}" data-action="open">Buka</button>
-        <button class="icon-btn edit" data-id="${folder.id}" data-action="rename">Rename</button>
-        <button class="icon-btn danger" data-id="${folder.id}" data-action="delete">Hapus</button>
-      </div>`;
-      foldersContainer.appendChild(card);
+  chat.sendBtn.onclick = sendMessage;
+  chat.messageInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+  chat.menuBtn.onclick = () => {
+    chat.popupMenu.style.display = chat.popupMenu.style.display === 'flex' ? 'none' : 'flex';
+  };
+  chat.importFile.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!Array.isArray(data.patterns)) return alert('Format salah!');
+    const batch = writeBatch(db);
+    data.patterns.forEach(item => {
+      if (item.tanya && item.jawab) {
+        const q = item.tanya.toLowerCase();
+        knowledgeBase.set(q, item.jawab);
+        batch.set(doc(db, "knowledgeBase", q), { jawab: item.jawab });
+      }
     });
-  }catch(err){ console.error('renderFolders err',err); alert('Gagal render folders: '+err); }
-}
+    await batch.commit();
+    addMessage(`✅ Berhasil impor ${data.patterns.length} item.`, 'bot');
+  };
 
-async function renderTableForFolder(folderId){
-  currentFolderId = folderId;
-  const txf = db.transaction(STORE_FOLDERS,'readonly'); const nameReq = txf.objectStore(STORE_FOLDERS).get(folderId);
-  nameReq.onsuccess = ()=> { folderTitle.textContent = 'Folder: ' + (nameReq.result?.name || 'Folder'); };
-  const items = await getItemsForFolder(folderId);
-  tbody.innerHTML=''; let sumHarga=0,sumLaba=0;
-  items.sort((a,b)=> (a.createdAt||0)-(b.createdAt||0));
-  items.forEach((it,idx)=>{
-    sumHarga += Number(it.harga)||0; sumLaba += Number(it.laba)||0;
-    const tr=document.createElement('tr');
-    tr.innerHTML = `<td>${idx+1}</td>
-      <td class="cell-nama" contenteditable="true" data-id="${it.id}">${escapeHtml(it.nama)}</td>
-      <td class="cell-harga" contenteditable="true" data-id="${it.id}">${formatNumber(it.harga)}</td>
-      <td class="cell-laba" contenteditable="true" data-id="${it.id}">${formatNumber(it.laba)}</td>
-      <td><button class="btn small del" data-id="${it.id}">Hapus</button></td>`;
-    tbody.appendChild(tr);
-  });
-  sumHargaEl.textContent = formatNumber(sumHarga);
-  sumLabaEl.textContent = formatNumber(sumLaba);
+  document.onclick = (e) => {
+    if (!chat.menuBtn.contains(e.target) && !chat.popupMenu.contains(e.target)) {
+      chat.popupMenu.style.display = 'none';
+    }
+  };
 
-  // attach events
-  tbody.querySelectorAll('.cell-nama').forEach(el=>el.addEventListener('blur',async ()=>{
-    const id=Number(el.dataset.id); const v=el.innerText.trim(); await updateItemInDB(id,{nama:v}); renderTableForFolder(folderId);
-  }));
-  tbody.querySelectorAll('.cell-harga').forEach(el=>el.addEventListener('blur',async ()=>{
-    const id=Number(el.dataset.id); const raw=el.innerText.replace(/[^\d.-]/g,'').trim(); const val = raw===''?0:Number(raw);
-    if(isNaN(val)){ alert('Harga harus angka'); renderTableForFolder(folderId); return; } await updateItemInDB(id,{harga:val}); renderTableForFolder(folderId);
-  }));
-  tbody.querySelectorAll('.cell-laba').forEach(el=>el.addEventListener('blur',async ()=>{
-    const id=Number(el.dataset.id); const raw=el.innerText.replace(/[^\d.-]/g,'').trim(); const val = raw===''?0:Number(raw);
-    if(isNaN(val)){ alert('Laba harus angka'); renderTableForFolder(folderId); return; } await updateItemInDB(id,{laba:val}); renderTableForFolder(folderId);
-  }));
-  tbody.querySelectorAll('button.del').forEach(btn=>btn.addEventListener('click',async ()=>{
-    const id=Number(btn.dataset.id); if(!confirm('Hapus item ini?')) return; await deleteItemInDB(id); renderTableForFolder(folderId);
-  }));
-}
+  const exportData = () => {
+    const items = [];
+    knowledgeBase.forEach((jawab, tanya) => {
+      items.push({ tanya, jawab });
+    });
+    const data = JSON.stringify({ patterns: items }, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `knowledgeBase_${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
-// ---------- UI wiring ----------
-btnAddFolder.addEventListener('click',()=>showModal('add'));
-modalCancel.addEventListener('click',hideModal);
-modalSave.addEventListener('click',async ()=>{
-  const val=modalInput.value.trim(); if(!val){ alert('Nama folder tidak boleh kosong'); return; }
-  try{ if(modalMode==='add') await addFolder(val); else if(modalMode==='rename' && editFolderId!=null) await updateFolder(editFolderId,val); hideModal(); await renderFolders(); }catch(err){console.error(err); alert('Gagal simpan folder: '+err);}
+  toggleInput(true);
+  addMessage('🔗 Menghubungkan...', 'bot');
+  await loadKnowledge();
 });
-
-foldersContainer.addEventListener('click',async (ev)=>{
-  const btn = ev.target.closest('button[data-action]'); if(!btn) return;
-  const id = Number(btn.dataset.id); const action = btn.dataset.action;
-  if(action==='open'){ viewFolders.classList.remove('active'); viewTable.classList.add('active'); await renderTableForFolder(id); }
-  else if(action==='rename'){ modalMode='rename'; editFolderId=id; const tx=db.transaction(STORE_FOLDERS,'readonly'); tx.objectStore(STORE_FOLDERS).get(id).onsuccess=(e)=>showModal('rename',id,e.target.result?.name||''); }
-  else if(action==='delete'){ if(!confirm('Yakin hapus folder & isinya?')) return; try{ await deleteFolderAndItems(id); await renderFolders(); }catch(err){console.error(err); alert('Gagal hapus: '+err);} }
-});
-
-btnBack.addEventListener('click',()=>{ viewTable.classList.remove('active'); viewFolders.classList.add('active'); });
-
-btnAddItem.addEventListener('click',async ()=>{
-  const nama = inputNama.value.trim(); const harga = parseFloat(inputHarga.value) || 0; const laba = parseFloat(inputLaba.value) || 0;
-  if(!nama){ alert('Isi nama barang'); return; }
-  try{ await addItemToDB(nama,harga,laba); inputNama.value=''; inputHarga.value=''; inputLaba.value=''; await renderTableForFolder(currentFolderId); }catch(err){console.error(err); alert('Gagal tambah item: '+err);}
-});
-
-// ---------- init ----------
-openDB_safe().then(()=>renderFolders()).catch(err=>{ console.error('Gagal buka DB:',err); alert('Gagal buka DB: '+(err && err.message || err)); });
 </script>
 </body>
 </html>
