@@ -3,114 +3,83 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="manifest" href="/manifest.json" />
   
-  <link rel="manifest" href="manifest.json" />
   
-  <title>Catbot GPT Final</title>
+  <title>Catbot GPT - Final Stabil</title>
   <style>
+    :root {
+      --primary-start: #667eea;
+      --primary-end: #764ba2;
+      --user-bubble: #667eea;
+      --bot-bubble: #ffffff;
+      --bg-light: #f8f9fa;
+      --border-color: #e0e0e0;
+      --text-dark: #333;
+      --text-light: #ffffff;
+    }
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
       height: 100vh; display: flex; justify-content: center; align-items: center;
     }
     .chatbot-container {
-      width: 420px; height: 700px; background: white; border-radius: 20px;
+      width: 420px; height: 700px; background: var(--bot-bubble); border-radius: 20px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden;
       display: flex; flex-direction: column; position: relative;
     }
     .chat-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white; padding: 20px; text-align: center; position: relative;
+      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+      color: var(--text-light); padding: 20px; text-align: center; position: relative; flex-shrink: 0;
     }
-    .bot-avatar {
-      width: 50px; height: 50px; background: white; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 10px; font-size: 20px; color: #667eea; font-weight: bold;
-    }
-    .menu-button {
-      position: absolute; top: 15px; right: 15px; background: transparent;
-      border: none; font-size: 24px; color: white; cursor: pointer; padding: 5px;
-    }
-    .popup-menu {
-      position: absolute; top: 55px; right: 15px; background: #fff;
-      border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-      display: none; flex-direction: column; z-index: 999; min-width: 160px;
-    }
-    .popup-menu button {
-      background: none; border: none; padding: 12px 20px; text-align: left;
-      cursor: pointer; width: 100%; font-size: 14px; color: #333;
-    }
+    .bot-avatar { width: 50px; height: 50px; background: var(--bot-bubble); border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; color: var(--primary-start); font-weight: bold; font-size: 20px; }
+    .menu-button { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; color: var(--text-light); cursor: pointer; }
+    .popup-menu { position: absolute; top: 55px; right: 15px; background: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); display: none; flex-direction: column; z-index: 999; }
+    .popup-menu button { background: none; border: none; padding: 12px 20px; text-align: left; cursor: pointer; width: 100%; font-size: 14px; }
     .popup-menu button:hover { background: #f2f2f2; }
-    .chat-messages {
-      flex: 1; padding: 20px; overflow-y: auto; background: #f8f9fa;
-    }
-    .message { margin-bottom: 15px; display: flex; align-items: flex-end; }
+    .chat-messages { flex: 1; padding: 20px; overflow-y: auto; background: var(--bg-light); }
+    .message { margin-bottom: 15px; display: flex; }
     .message.user { justify-content: flex-end; }
-    .message-bubble {
-      max-width: 70%; padding: 12px 16px; border-radius: 18px; word-wrap: break-word;
-    }
-    .message.user .message-bubble {
-      background: #667eea; color: white; border-bottom-right-radius: 5px; font-size: 16px;
-    }
-    .message.bot .message-bubble {
-      background: white; color: #333; border: 1px solid #e0e0e0;
-      border-bottom-left-radius: 5px;
-    }
-    .chat-input-container {
-      padding: 20px; background: white; border-top: 1px solid #e0e0e0;
-    }
-    .input-group {
-      display: flex; gap: 10px; align-items: center;
-    }
-    .chat-input {
-      flex: 1; padding: 12px 16px; border: 2px solid #e0e0e0;
-      border-radius: 25px; outline: none; font-size: 14px;
-    }
-    .send-btn {
-      width: 45px; height: 45px; background: #667eea; border: none;
-      border-radius: 50%; color: white; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .learning-mode {
-      background: #fff8dc; border: 1px solid #ffe58f; border-radius: 10px;
-      padding: 15px; margin: 10px 0; text-align: center;
-    }
-    .learning-mode input {
-      padding: 10px; width: 95%; border: 1px solid #ccc; border-radius: 5px;
-      margin: 10px 0; font-size: 16px;
-    }
-    .learning-mode button {
-      padding: 8px 15px; margin: 5px; border: none; border-radius: 5px; cursor: pointer;
-    }
-    .learning-mode button.teach { background: #4CAF50; color: white; }
+    .message-bubble { max-width: 75%; padding: 12px 16px; border-radius: 18px; }
+    .message.user .message-bubble { background: var(--user-bubble); color: var(--text-light); border-bottom-right-radius: 5px; }
+    .message.bot .message-bubble { background: var(--bot-bubble); color: var(--text-dark); border: 1px solid var(--border-color); border-bottom-left-radius: 5px; }
+    .chat-input-container { padding: 15px 20px; background: var(--bot-bubble); border-top: 1px solid var(--border-color); flex-shrink: 0; }
+    .input-group { display: flex; gap: 10px; align-items: center; }
+    .chat-input { flex: 1; padding: 12px 16px; border: 2px solid var(--border-color); border-radius: 25px; outline: none; }
+    .send-btn { width: 45px; height: 45px; background: var(--user-bubble); border: none; border-radius: 50%; color: var(--text-light); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .learning-mode { background: #fff8dc; border-top: 1px solid #ffe58f; padding: 15px 20px; }
+    .learning-mode p { margin-bottom: 10px; }
+    .learning-mode input { padding: 10px; width: 100%; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 10px; }
+    .learning-mode button { padding: 10px 15px; border: none; border-radius: 5px; background: #4CAF50; color: white; width: 100%; font-size: 16px; cursor: pointer; }
+    
+.learning-mode textarea {
+  padding: 10px;
+  width: 100%;
+  height: 160px;  /* tinggi default */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  box-sizing: border-box;
+  resize: vertical;  /* bisa diubah tinggi oleh user */
+}
+    
   </style>
 </head>
-<script type="module" src="https://tabelku.netlify.app/firebase.js"></script>
 <body>
   <div class="chatbot-container">
     <div class="chat-header">
-      <button class="menu-button" onclick="togglePopup()">⋮</button>
+      <button class="menu-button" id="menuBtn">⋮</button>
       <div class="popup-menu" id="popupMenu">
-        <button onclick="importData()">📂 Upload Data</button>
-        <button onclick="exportData()">💾 Download Data</button>
-        <button onclick="clearData()">🗑️ Hapus Semua</button>
+        <button id="uploadBtn">📂 Upload Data</button>
+        <button id="downloadBtn">💾 Download Data</button>
       </div>
       <div class="bot-avatar">🤖</div>
-      <h3>Catbot GPT</h3>
-      <h5>Siap melayani</h5>
+      <h3>Catbot GPT</h3><h5>Siap melayani</h5>
     </div>
-
-    <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
-
-    <div class="chat-messages" id="chatMessages">
-      <div class="message bot">
-        <div class="message-bubble">
-          Halo! Ketik pertanyaanmu.
-        </div>
-      </div>
-    </div>
-
+    <div class="chat-messages" id="chatMessages"></div>
+    <div id="teachContainer"></div>
     <div class="chat-input-container">
       <div class="input-group">
         <input type="text" class="chat-input" id="messageInput" placeholder="Ketik pertanyaan...">
@@ -118,151 +87,219 @@
       </div>
     </div>
   </div>
+  <input type="file" id="importFile" accept=".json" style="display:none">
 
 <script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const chat = {
+    downloadBtn: document.getElementById('downloadBtn'),
+    chatMessages: document.getElementById('chatMessages'),
+    messageInput: document.getElementById('messageInput'),
+    sendBtn: document.getElementById('sendBtn'),
+    teachContainer: document.getElementById('teachContainer'),
+    menuBtn: document.getElementById('menuBtn'),
+    popupMenu: document.getElementById('popupMenu'),
+    uploadBtn: document.getElementById('uploadBtn'),
+    importFile: document.getElementById('importFile')
+  };
 
-  let currentInput = '';
-  let knowledgeBase = {};
+  // Open IndexedDB
+  const DB_NAME = 'CatbotDB';
+  const STORE_NAME = 'knowledgeBase';
+  let db;
 
-  // Load yang lama kalau ada
-  if (localStorage.getItem('knowledgeBase')) {
-    knowledgeBase = JSON.parse(localStorage.getItem('knowledgeBase'));
-  }
-
-  // Tambah pesan ke chat
-  function addMessage(text, isUser = false) {
-    const container = document.getElementById('chatMessages');
-    const div = document.createElement('div');
-    div.className = `message ${isUser ? 'user' : 'bot'}`;
-    div.innerHTML = `<div class="message-bubble">${text}</div>`;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-  }
-
-  // Kirim pesan
-  function sendMessage() {
-    const inputField = document.getElementById('messageInput');
-    const userOriginal = inputField.value.trim();
-    const userText = userOriginal.toLowerCase();
-    if (!userText) return;
-
-    addMessage(userOriginal, true);
-    inputField.value = '';
-
-    if (knowledgeBase[userText]) {
-      addMessage(knowledgeBase[userText]);
-    } else {
-      currentInput = userText;
-      addMessage("Maaf, saya belum tau. Mau ajari bot?");
-      addLearning();
-    }
-  }
-
-  // Form ajar bot
-  function addLearning() {
-    // Hapus form lama kalau ada
-    const existing = document.querySelector('.learning-mode');
-    if (existing) existing.remove();
-
-    const container = document.getElementById('chatMessages');
-    const div = document.createElement('div');
-    div.className = 'learning-mode';
-    div.innerHTML = `
-      <p>Jawaban belum ada. Mau ajari bot?</p>
-      <input type="text" id="teachInput" placeholder="Ketik jawaban di sini...">
-      <button class="teach" onclick="saveTeaching()">Simpan Jawaban</button>
-    `;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-  }
-
-  // Simpan jawaban baru
-  function saveTeaching() {
-    const jawab = document.getElementById('teachInput').value.trim();
-    if (jawab) {
-      knowledgeBase[currentInput] = jawab;
-      localStorage.setItem('knowledgeBase', JSON.stringify(knowledgeBase));
-      addMessage("Terima kasih! Bot sudah diajari.");
-      document.querySelector('.learning-mode').remove();
-    } else {
-      alert('Jawaban tidak boleh kosong!');
-    }
-  }
-
-  // Toggle menu popup
-  function togglePopup() {
-    const popup = document.getElementById('popupMenu');
-    popup.style.display = popup.style.display === 'flex' ? 'none' : 'flex';
-  }
-
-  // Export file JSON
-  function exportData() {
-    const dataStr = JSON.stringify(knowledgeBase, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'knowledgeBase.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  // Mulai import
-  function importData() {
-    document.getElementById('importFile').click();
-  }
-
-  // Handle file masuk
-  function handleImport(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        const importedData = JSON.parse(e.target.result);
-        let newData = {};
-
-        if (Array.isArray(importedData.patterns)) {
-          importedData.patterns.forEach(item => {
-            newData[item.tanya.trim().toLowerCase()] = item.jawab;
-          });
-        } else if (typeof importedData === 'object') {
-          Object.keys(importedData).forEach(key => {
-            newData[key.trim().toLowerCase()] = importedData[key];
-          });
-        } else {
-          alert('Format file tidak valid!');
-          return;
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, 1);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'tanya' });
         }
+      };
+      request.onsuccess = () => {
+        db = request.result;
+        resolve(db);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
 
-        // Gabungkan, jangan replace!
-        knowledgeBase = { ...knowledgeBase, ...newData };
-        localStorage.setItem('knowledgeBase', JSON.stringify(knowledgeBase));
-        alert('Data berhasil di-import!');
-      } catch (err) {
-        alert('Gagal membaca file JSON!');
+  // Get all data from store
+  function getAllData() {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  // Save or update one item
+  function saveItem(item) {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const req = store.put(item);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  // Batch save array of items
+  function saveBatch(items) {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      items.forEach(item => store.put(item));
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+  }
+
+  const knowledgeBase = new Map();
+
+  chat.uploadBtn.onclick = () => {
+    chat.popupMenu.style.display = 'none';
+    chat.importFile.click();
+  };
+
+  chat.downloadBtn.onclick = () => {
+    chat.popupMenu.style.display = 'none';
+    exportData();
+  };
+
+  const addMessage = (text, sender = 'bot') => {
+    const msg = document.createElement('div');
+    msg.className = `message ${sender}`;
+    msg.innerHTML = `<div class="message-bubble">${text}</div>`;
+    chat.chatMessages.appendChild(msg);
+    chat.chatMessages.scrollTop = chat.chatMessages.scrollHeight;
+  };
+
+  const toggleInput = (state) => {
+    chat.messageInput.disabled = !state;
+    chat.sendBtn.disabled = !state;
+  };
+
+  const loadKnowledge = async () => {
+    try {
+      await openDB();
+      const data = await getAllData();
+      data.forEach(item => knowledgeBase.set(item.tanya.toLowerCase(), item.jawab));
+      addMessage('✅ Database IndexedDB siap. Tanyakan apa saja!', 'bot');
+    } catch (err) {
+      console.error(err);
+      addMessage('⚠️ Gagal akses IndexedDB. Aku akan tetap berusaha!', 'bot');
+    }
+  };
+
+  const sendMessage = async () => {
+    const msg = chat.messageInput.value.trim();
+    if (!msg) return;
+    addMessage(msg, 'user');
+    chat.messageInput.value = '';
+    toggleInput(false);
+
+    setTimeout(() => {
+      const ans = knowledgeBase.get(msg.toLowerCase());
+      if (ans) {
+        addMessage(ans, 'bot');
+      } else {
+        addMessage("Aku belum tahu itu. Ajarin aku, ya!", 'bot');
+        teachUI(msg);
+      }
+      toggleInput(true);
+    }, 300);
+  };
+
+  const teachUI = (q) => {
+    chat.teachContainer.innerHTML = `<div class="learning-mode">
+      <p>Ajarin aku: <b>${q}</b></p>
+      <textarea id="teachInput" placeholder="Jawabannya..." rows="5"></textarea>
+      <button id="teachSaveBtn">Simpan</button>
+    </div>`;
+    document.getElementById('teachInput').focus();
+    document.getElementById('teachSaveBtn').onclick = async () => {
+      const ans = document.getElementById('teachInput').value.trim();
+      if (!ans) return alert('Isi jawaban dulu!');
+      addMessage('⏳ Menyimpan...', 'bot');
+      try {
+        const key = q.toLowerCase();
+        await saveItem({ tanya: key, jawab: ans });
+        knowledgeBase.set(key, ans);
+        addMessage('✅ Berhasil disimpan di IndexedDB!', 'bot');
+        chat.teachContainer.innerHTML = '';
+      } catch (e) {
+        addMessage('❌ Gagal menyimpan data.', 'bot');
       }
     };
-    reader.readAsText(file);
-  }
+  };
 
-  // Hapus semua data
-  function clearData() {
-    if (confirm('Yakin mau hapus semua data?')) {
-      knowledgeBase = {};
-      localStorage.removeItem('knowledgeBase');
-      alert('Semua data dihapus!');
+  chat.sendBtn.onclick = sendMessage;
+  chat.messageInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+  chat.menuBtn.onclick = () => {
+    chat.popupMenu.style.display = chat.popupMenu.style.display === 'flex' ? 'none' : 'flex';
+  };
+
+  chat.importFile.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const text = await file.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      return alert('Format file bukan JSON valid!');
     }
-  }
+    if (!Array.isArray(data.patterns)) return alert('Format JSON salah! Harus ada array "patterns"');
+    try {
+      const items = [];
+      data.patterns.forEach(item => {
+        if (item.tanya && item.jawab) {
+          const q = item.tanya.toLowerCase();
+          knowledgeBase.set(q, item.jawab);
+          items.push({ tanya: q, jawab: item.jawab });
+        }
+      });
+      await saveBatch(items);
+      addMessage(`✅ Berhasil impor ${items.length} item ke IndexedDB.`, 'bot');
+    } catch (e) {
+      console.error(e);
+      addMessage('❌ Gagal impor data.', 'bot');
+    }
+  };
 
-  // Tombol kirim & enter
-  document.getElementById('sendBtn').addEventListener('click', sendMessage);
-  document.getElementById('messageInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') sendMessage();
-  });
+  document.onclick = (e) => {
+    if (!chat.menuBtn.contains(e.target) && !chat.popupMenu.contains(e.target)) {
+      chat.popupMenu.style.display = 'none';
+    }
+  };
+
+  const exportData = async () => {
+    try {
+      const allData = await getAllData();
+      const items = allData.map(({ tanya, jawab }) => ({ tanya, jawab }));
+      const data = JSON.stringify({ patterns: items }, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `knowledgeBase_${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      addMessage('❌ Gagal ekspor data.', 'bot');
+    }
+  };
+
+  toggleInput(true);
+  addMessage('🔗 Menghubungkan IndexedDB...', 'bot');
+  await loadKnowledge();
+});
 </script>
-
 </body>
 </html>
